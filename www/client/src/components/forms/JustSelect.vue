@@ -24,7 +24,7 @@
 
 
 export default {
-  name: 'just-select',
+  name: 'justSelect',
   inheritAttrs: false,
   props: {
     inputId: {
@@ -79,7 +79,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style>
+/*
 .just-select {
   position: relative;
   width: 100%;
@@ -160,6 +161,5 @@ export default {
     }
   }
 }
-
-
+ */
 </style>

@@ -73,7 +73,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style>
+/*
 .just-checkbox {
   &__input {
     position: absolute;
@@ -113,4 +114,6 @@ export default {
     }
   }
 }
+
+ */
 </style>

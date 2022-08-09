@@ -3,6 +3,9 @@ import App from "./App.vue";
 import store from "./store";
 import { createRouter, createWebHashHistory } from "vue-router";
 
+
+// import ru from 'vee-validate/dist/locale/ru'
+
 const router = createRouter({
   history: createWebHashHistory(),
   routes: [
@@ -29,6 +32,8 @@ const router = createRouter({
     }
   ]
 });
+
+
 
 createApp(App)
   .use(store)

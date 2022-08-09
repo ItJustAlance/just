@@ -25,7 +25,7 @@
 
 
 export default {
-  name: 'just-textarea',
+  name: 'justTextarea',
   // directives: { mask },
   inheritAttrs: false,
   props: {
@@ -145,8 +145,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-
+<style>
+/*
 .vfl-has-label {
   position: relative;
 }
@@ -235,7 +235,5 @@ export default {
     fill: #fff
   }
 }
-
-
-
+*/
 </style>

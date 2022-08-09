@@ -22,7 +22,7 @@
 
 
 export default {
-  name: 'just-radio',
+  name: 'justRadio',
   props: {
     modelValue: {
       default: ""
@@ -99,7 +99,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style>
+/*
 .just-radio {
   &__input {
     position: absolute;
@@ -146,6 +147,6 @@ export default {
     }
   }
 }
-
+*/
 
 </style>

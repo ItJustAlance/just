@@ -436,8 +436,8 @@ export default {
 
 </script>
 
-<style lang="scss">
-
+<style>
+/*
 
 .just-form {
   color: rgba(0,0,0, 0.60);
@@ -551,6 +551,8 @@ export default {
     }
   }
 }
+
+ */
 
 
 </style>

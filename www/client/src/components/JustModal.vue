@@ -104,7 +104,6 @@ export default {
         setTimeout(() => this.isShowAnimate = true, 300);
       }
     }
-    
   },
   methods: {
     ...mapActions("modals", ["toggleModal"]),
@@ -113,12 +112,12 @@ export default {
       this.isShowAnimate = false;
       setTimeout(() => this.toggleModal(false), 200);
     }
-    
   }
 }
 </script>
 
-<style scoped lang="scss">
+<style>
+/*
 //@import "./src/assets/scss/common";
 
 .just-modal {
@@ -286,4 +285,6 @@ export default {
     bottom: 0;
   }
 }
+
+ */
 </style>

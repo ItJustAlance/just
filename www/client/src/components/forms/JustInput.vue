@@ -158,8 +158,8 @@ export default {
 }
 </script>
 
-<style lang="scss">
-
+<style>
+/*
 .vfl-has-label {
   position: relative;
 }
@@ -249,6 +249,8 @@ export default {
   }
 }
 
+
+ */
 
 
 </style>
