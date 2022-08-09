@@ -1,12 +1,12 @@
 import { createStore, createLogger } from "vuex";
 
-import todos from "./modules/todos";
+import modals from "./modules/modals";
 
 const debug = process.env.NODE_ENV !== "production";
 
 export default createStore({
   modules: {
-    todos
+    modals
   },
   strict: debug,
   plugins: debug ? [createLogger()] : []

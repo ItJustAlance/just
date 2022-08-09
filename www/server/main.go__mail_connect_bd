@@ -1,0 +1,192 @@
+package main
+
+import (
+	"database/sql"
+	"encoding/json"
+	"fmt"
+
+	"log"
+	"math/rand"
+	"net/http"
+	"strconv"
+
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+
+	gomail "gopkg.in/gomail.v2"
+	
+	// старт для использования env
+	"os"
+    "github.com/joho/godotenv"
+    // конец для использования env
+)
+
+type Book struct {
+	Id     string  `json:"id"`
+	Title  string  `json:"title"`
+	Author *Author `json:"author"`
+}
+
+type Author struct {
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+}
+
+type Phone struct {
+	Id string `json:"id"`
+	Name string `json:"phoneModel"`
+
+}
+var phones []Phone
+var books []Book
+
+
+func sendMail(w http.ResponseWriter, r *http.Request) {
+	// env
+	ENV_GO_EMAIL_LOGIN := os.Getenv("GO_EMAIL_LOGIN")
+	ENV_GO_EMAIL_PASS := os.Getenv("GO_EMAIL_PASS")
+	ENV_GO_EMAIL_FROM := os.Getenv("GO_EMAIL_FROM")
+	ENV_GO_EMAIL_TO := os.Getenv("GO_EMAIL_TO")
+
+	fmt.Println("----111 ----")
+	// fmt.Println(GO_EMAIL_LOGIN)
+	fmt.Println("---- 2222 ----")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	// определяем заголовок как json, очень важно заголовок сделать чтобы совпадали с фронтом
+	w.Header().Set("Content-Type", "application/json")
+
+	// распарсиваем ответ
+	r.ParseForm()
+	// декодируем
+    decoder := json.NewDecoder(r.Body)
+    // создаем переменную
+	var params map[string]string
+	// видимо делаем map
+    decoder.Decode(&params)
+
+    // fmt.Printf("POST json: username=%s, password=%s\n", params["data"], params["userName"])
+	userPhone := params["userPhone"]
+    userName := params["userName"]
+    userMess := params["userMess"]
+
+
+	m := gomail.NewMessage()
+    m.SetHeader("From", ENV_GO_EMAIL_FROM)
+    m.SetHeader("To", ENV_GO_EMAIL_TO)
+    m.SetHeader("Subject", "Новая заявка")
+    m.SetBody("text/html", fmt.Sprintf("Пользователь указал следующие данные: <br> Телефон: '%s' <br> Email: '%s' <br> Сообщение: '%s'", userName, userPhone, userMess))
+
+    d := gomail.NewDialer("smtp.gmail.com", 587, ENV_GO_EMAIL_LOGIN, ENV_GO_EMAIL_PASS)
+
+    if err := d.DialAndSend(m); err != nil {
+        log.Println("CAN NOT GENERATE EMAIL:", err)
+        return
+    }
+    log.Println("EMAIL SENT SUCCESSFULLY")
+    return
+}
+
+
+func getDb(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "text/plain")
+	// обнуляем перед загрузкой страницы
+    phones = []Phone{}
+	// подлкючаемся к БД
+	db, err := sql.Open("mysql", "user:password@tcp(172.26.0.3:3306)/sample")
+	// проверка соединения
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	insert, err := db.Query("INSERT INTO `t_sample` (`name`, `created_at`, `updated_at`) VALUES('tessst', '3333', '5555')")
+	if err != nil {
+		panic(err.Error())
+	}
+	defer insert.Close()
+
+	res, err := db.Query("SELECT `id`, `name` FROM `t_sample`")
+    	if err != nil {
+    		panic(err.Error())
+    	}
+	for res.Next() {
+	// создаем обьект post на основе обьекта PhoneModel
+		var model Phone
+		err = res.Scan(&model.Id, &model.Name)
+		phones = append(phones, model)
+	}
+	defer res.Close()
+	json.NewEncoder(w).Encode(phones)
+	// гдето тут не работает end
+	fmt.Println("-------------1---------------------")
+}
+
+func getBooks(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	// обнуляем перед загрузкой страницы
+	books = []Book{}
+	books = append(books, Book{Id: "1", Title: "Война и Мир", Author: &Author{Firstname: "Лев", Lastname: "Толстой"}})
+    books = append(books, Book{Id: "2", Title: "Преступление и наказание", Author: &Author{Firstname: "Фёдор", Lastname: "Достоевский"}})
+	json.NewEncoder(w).Encode(books)
+}
+
+func getBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for _, item := range books {
+		if item.Id == params["id"] {
+			json.NewEncoder(w).Encode(item)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(&Book{})
+}
+
+func createBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	var book Book
+	_ = json.NewDecoder(r.Body).Decode(&book)
+	book.Id = strconv.Itoa(rand.Intn(1000000))
+	books = append(books, book)
+	json.NewEncoder(w).Encode(book)
+}
+
+func updateBook(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	params := mux.Vars(r)
+	for index, item := range books {
+		if item.Id == params["id"] {
+			books = append(books[:index], books[index+1:]...)
+			var book Book
+			_ = json.NewDecoder(r.Body).Decode(&book)
+			book.Id = params["id"]
+			books = append(books, book)
+			json.NewEncoder(w).Encode(book)
+			return
+		}
+	}
+	json.NewEncoder(w).Encode(books)
+}
+func main() {
+	r := mux.NewRouter()
+
+	err := godotenv.Load(".env")
+    if err != nil {
+        log.Fatalf("Some error occured. Err: %s", err)
+    }
+
+
+
+	r.HandleFunc("/books", getBooks).Methods("GET")
+	r.HandleFunc("/book/{id}", getBook).Methods("GET")
+	r.HandleFunc("/book", createBook).Methods("POST")
+	r.HandleFunc("/book/{id}", updateBook).Methods("PUT")
+	r.HandleFunc("/db", getDb).Methods("GET")
+	r.HandleFunc("/sendContact", sendMail).Methods("POST")
+	log.Fatal(http.ListenAndServe(":8888", r))
+}
